@@ -1,21 +1,19 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/kubernetes-helm-minikube
 {
-	"name": "Kubernetes - Minikube-in-Docker",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"name": "My Dev Container",
 	"image": "mcr.microsoft.com/devcontainers/base:bullseye",
-
 	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {
-			"enableNonRootDocker": "true",
-			"moby": "true"
-		},
-		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
-		"ghcr.io/devcontainers/features/terraform:1": {}
-	}
+	  "ghcr.io/devcontainers/features/docker-in-docker:2": {
+		"enableNonRootDocker": "true",
+		"moby": "true"
+	  },
+	  "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {},
+	  "ghcr.io/devcontainers/features/terraform:1": {}
+	},
 	
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	"forwardPorts": [30100]
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "kubectl version",
