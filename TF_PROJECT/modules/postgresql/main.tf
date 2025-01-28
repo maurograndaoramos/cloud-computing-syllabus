@@ -23,7 +23,7 @@ resource "kubernetes_deployment" "postgres" {
       spec {
         container {
           name  = "postgres"
-          image = "postgres:13"
+          image = "postgres:16"
           port {
             container_port = 5432
           }
@@ -50,7 +50,7 @@ resource "kubernetes_deployment" "postgres" {
 
 resource "kubernetes_service" "postgres" {
   metadata {
-    name      = "postgres"
+    name      = "postgres-service"
     namespace = var.namespace
   }
 

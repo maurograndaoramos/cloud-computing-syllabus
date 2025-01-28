@@ -21,6 +21,15 @@ resource "kubernetes_deployment" "odoo" {
       }
 
       spec {
+        init_container {
+          name  = "wait-for-postgres"
+          image = "busybox:1.31.1"
+          command = [
+            "sh", "-c",
+            "until nc -zv ${var.db_host} 5432; do echo 'Waiting for PostgreSQL...'; sleep 5; done;"
+          ]
+        }
+
         container {
           name  = "odoo"
           image = "odoo:latest"
@@ -30,28 +39,31 @@ resource "kubernetes_deployment" "odoo" {
 
           env {
             name  = "HOST"
-            value = "postgres"  # Replace with your PostgreSQL service name
+            value = var.db_host
           }
 
           env {
             name  = "USER"
-            value = "odoo"  # Replace with your PostgreSQL username
+            value = var.db_user
           }
 
           env {
             name  = "PASSWORD"
-            value = "odoo"  # Replace with your PostgreSQL password
+            value = var.db_password
           }
 
           env {
             name  = "DB_NAME"
-            value = "odoo"  # Replace with your PostgreSQL database name
+            value = var.db_name
           }
+
+          command = ["/bin/bash", "-c", "odoo -i base --xmlrpc-port=8069"]
         }
       }
     }
   }
 }
+
 
 resource "kubernetes_service" "odoo" {
   metadata {
@@ -61,7 +73,7 @@ resource "kubernetes_service" "odoo" {
 
   spec {
     selector = {
-      app = kubernetes_deployment.odoo.spec.0.template.0.metadata.0.labels.app
+      app = kubernetes_deployment.odoo.spec[0].template[0].metadata[0].labels.app
     }
 
     port {

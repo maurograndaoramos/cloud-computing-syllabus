@@ -7,3 +7,8 @@ variable "namespace" {
   description = "The namespace for the Ingress resource"
   type        = string
 }
+
+variable "cluster_issuer_name" {
+  description = "The name of the ClusterIssuer"
+  type        = string
+}

@@ -10,13 +10,38 @@ This project deploys a Kubernetes cluster and Odoo application for multiple clie
 ## Deployment Instructions
 1. Start Minikube:
    ```bash
-   minikube start --driver=docker --cpus=2 --memory=4096
+   minikube start
    ```
 
-2. Start Terraform:
+2. Apply the cert-manager.yaml:
+   ```bash
+   kubectl apply -f cert-manager.yaml
+   ```
+
+3. Enable Ingress Addon:
+   ```bash
+   minikube addons enable ingress
+   ```
+
+4. Start Terraform:
    ```bash
    terraform init
    ```
 
-3. Apply Terraform with the appropriate namespace
+5. Create appropriate Workspace for each new cluster you want to create:
+   ```bash
+   terraform workspace new netflix-prod
+   ```
 
+
+6. Apply Terraform with the appropriate namespace:
+   ```bash
+   terraform apply -var-file=clients/netflix.tfvars
+   ```
+   Or any other .tfvar file in the clients directory. You can change any of the default values by applying
+   ```bash
+   terraform apply -var-file=clients/netflix.tfvars -var="replica_count=1" -var="qa"
+   ```
+   You will be prompted to fill the missing variable that is not set to a default, which will be the namespace. If you've selected a workspace you created
+
+7. Access the Odoo application at https://<domain-name>. Just change the domain name to any on the .tfvars files.

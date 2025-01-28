@@ -19,7 +19,20 @@ variable "replica_count" {
   default     = 1
 }
 
-variable "namespace" {
-  description = "The namespace for the Kubernetes resources"
+variable "db_name" {
+  description = "The PostgreSQL database name"
   type        = string
+  default     = "odoo"
+}
+
+variable "db_user" {
+  description = "The PostgreSQL database user"
+  type        = string
+  default     = "odoo"
+}
+
+variable "db_password" {
+  description = "The PostgreSQL database password"
+  type        = string
+  default     = "odoo"
 }
