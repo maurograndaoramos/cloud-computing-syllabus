@@ -8,7 +8,7 @@ This project deploys a Kubernetes cluster and Odoo application for multiple clie
 - kubectl
 
 ## Deployment Instructions
-1. Start Minikube:
+1. Before applying Terraform, ensure the Minikube profile is created for your client. Terraform can handle this dynamically if configured:
    ```bash
    minikube start
    ```
@@ -33,7 +33,6 @@ This project deploys a Kubernetes cluster and Odoo application for multiple clie
    terraform workspace new netflix-prod
    ```
 
-
 6. Apply Terraform with the appropriate namespace:
    ```bash
    terraform apply -var-file=clients/netflix.tfvars 
@@ -46,3 +45,8 @@ This project deploys a Kubernetes cluster and Odoo application for multiple clie
    It will also ask you for the name of the Profile you wish to add it to.
 
 7. Access the Odoo application at https://<domain-name>. Just change the domain name to any on the .tfvars files.
+
+In the future, if more clients are onboarded, you would only need to add new .tfvars in the client folder. The rest should be handled by simply applying with different variables.
+
+
+

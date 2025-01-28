@@ -77,9 +77,6 @@ module "ingress" {
   cluster_issuer_name = kubernetes_manifest.cluster_issuer.manifest.metadata.name
 }
 
-variable "minikube_profile" {
-  description = "The name of the Minikube profile to create"
-}
 
 variable "minikube_driver" {
   default = "docker"
@@ -96,13 +93,13 @@ variable "minikube_memory" {
 resource "null_resource" "minikube_profile" {
   provisioner "local-exec" {
     command = <<EOT
-    if ! minikube profile list | grep -q "${var.minikube_profile}"; then
-      minikube start --profile=${var.minikube_profile} \
+    if ! minikube profile list | grep -q "${var.client_name}"; then
+      minikube start --profile=${var.client_name} \
         --driver=${var.minikube_driver} \
         --cpus=${var.minikube_cpus} \
         --memory=${var.minikube_memory}
     else
-      echo "Minikube profile '${var.minikube_profile}' already exists."
+      echo "Minikube profile '${var.client_name}' already exists."
     fi
     EOT
   }
