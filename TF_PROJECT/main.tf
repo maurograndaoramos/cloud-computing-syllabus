@@ -28,7 +28,7 @@ resource "kubernetes_manifest" "cluster_issuer" {
     spec = {
       acme = {
         server = "https://acme-v02.api.letsencrypt.org/directory"
-        email  = "your-email@example.com"
+        email  = "fake@example.com"
         privateKeySecretRef = {
           name = "letsencrypt-prod"
         }
@@ -77,3 +77,33 @@ module "ingress" {
   cluster_issuer_name = kubernetes_manifest.cluster_issuer.manifest.metadata.name
 }
 
+variable "minikube_profile" {
+  description = "The name of the Minikube profile to create"
+}
+
+variable "minikube_driver" {
+  default = "docker"
+}
+
+variable "minikube_cpus" {
+  default = 2
+}
+
+variable "minikube_memory" {
+  default = 4096
+}
+
+resource "null_resource" "minikube_profile" {
+  provisioner "local-exec" {
+    command = <<EOT
+    if ! minikube profile list | grep -q "${var.minikube_profile}"; then
+      minikube start --profile=${var.minikube_profile} \
+        --driver=${var.minikube_driver} \
+        --cpus=${var.minikube_cpus} \
+        --memory=${var.minikube_memory}
+    else
+      echo "Minikube profile '${var.minikube_profile}' already exists."
+    fi
+    EOT
+  }
+}

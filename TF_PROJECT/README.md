@@ -36,12 +36,13 @@ This project deploys a Kubernetes cluster and Odoo application for multiple clie
 
 6. Apply Terraform with the appropriate namespace:
    ```bash
-   terraform apply -var-file=clients/netflix.tfvars
+   terraform apply -var-file=clients/netflix.tfvars 
    ```
    Or any other .tfvar file in the clients directory. You can change any of the default values by applying
    ```bash
    terraform apply -var-file=clients/netflix.tfvars -var="replica_count=1" -var="qa"
    ```
-   You will be prompted to fill the missing variable that is not set to a default, which will be the namespace. If you've selected a workspace you created
+   You will be prompted to fill the missing variable that is not set to a default, which will be the namespace.
+   It will also ask you for the name of the Profile you wish to add it to.
 
 7. Access the Odoo application at https://<domain-name>. Just change the domain name to any on the .tfvars files.
