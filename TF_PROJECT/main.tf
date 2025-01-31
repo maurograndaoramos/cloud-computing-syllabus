@@ -1,8 +1,49 @@
+terraform {
+  required_providers {
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = ">= 1.14.0"
+    }
+  }
+}
+
+variable "minikube_driver" {
+  default = "docker"
+}
+
+variable "minikube_cpus" {
+  default = 2
+}
+
+variable "minikube_memory" {
+  default = 4096
+}
+
+resource "null_resource" "minikube_profile" {
+  provisioner "local-exec" {
+    command = <<EOT
+    if ! minikube profile list | grep -q "${var.client_name}"; then
+      minikube start --profile=${var.client_name} \
+        --driver=${var.minikube_driver} \
+        --cpus=${var.minikube_cpus} \
+        --memory=${var.minikube_memory}
+    else
+      echo "Minikube profile '${var.client_name}' already exists."
+    fi
+    EOT
+  }
+}
+
 provider "kubernetes" {
   config_path = "~/.kube/config"
 }
 
+provider "kubectl" {
+  config_path = "~/.kube/config"
+}
+
 resource "kubernetes_namespace" "client_namespace" {
+  depends_on = [null_resource.minikube_profile]
   metadata {
     name = "${var.client_name}-${var.environment}"
   }
@@ -17,8 +58,24 @@ resource "local_file" "cert_manager_yaml" {
   content  = data.http.cert_manager.response_body
 }
 
+resource "kubectl_manifest" "cert_manager" {
+  yaml_body = file("${path.module}/cert-manager.yaml")
+}
+
+resource "null_resource" "wait_for_crds" {
+  depends_on = [kubectl_manifest.cert_manager]
+
+  provisioner "local-exec" {
+    command = <<EOT
+      echo "Waiting for cert-manager CRDs to become available..."
+      sleep 30  # Wait for 30 seconds (adjust as needed)
+    EOT
+  }
+}
 
 resource "kubernetes_manifest" "cluster_issuer" {
+  depends_on = [null_resource.wait_for_crds]
+
   manifest = {
     apiVersion = "cert-manager.io/v1"
     kind       = "ClusterIssuer"
@@ -45,7 +102,6 @@ resource "kubernetes_manifest" "cluster_issuer" {
     }
   }
 }
-
 
 module "kubernetes_cluster" {
   source    = "./modules/kubernetes-cluster"
@@ -75,32 +131,4 @@ module "ingress" {
   domain_name        = var.domain_name
   namespace          = kubernetes_namespace.client_namespace.metadata[0].name
   cluster_issuer_name = kubernetes_manifest.cluster_issuer.manifest.metadata.name
-}
-
-
-variable "minikube_driver" {
-  default = "docker"
-}
-
-variable "minikube_cpus" {
-  default = 2
-}
-
-variable "minikube_memory" {
-  default = 4096
-}
-
-resource "null_resource" "minikube_profile" {
-  provisioner "local-exec" {
-    command = <<EOT
-    if ! minikube profile list | grep -q "${var.client_name}"; then
-      minikube start --profile=${var.client_name} \
-        --driver=${var.minikube_driver} \
-        --cpus=${var.minikube_cpus} \
-        --memory=${var.minikube_memory}
-    else
-      echo "Minikube profile '${var.client_name}' already exists."
-    fi
-    EOT
-  }
 }

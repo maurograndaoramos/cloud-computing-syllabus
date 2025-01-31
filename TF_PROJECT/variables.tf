@@ -1,6 +1,11 @@
 variable "client_name" {
   description = "The name of the client (Netflix, Meta, Rockstar)"
   type        = string
+
+  validation {
+    condition     = var.client_name != null && var.client_name != ""
+    error_message = "The 'client_name' variable must be set and cannot be empty."
+  }
 }
 
 variable "environment" {
